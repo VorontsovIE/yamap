@@ -1,0 +1,8 @@
+﻿myCallback({
+    "type": "FeatureCollection",
+    "features": [
+        {"type": "Feature", "id": 1, "geometry": {"type": "Point", "coordinates": [55.998333, -2.522778]}, "properties": {"balloonContentBody": "Битвы", "balloonContentFooter": "Подвал", "balloonContentHeader": "содержимое", "hintContent": "Битва при Данбаре 2"}},
+	{"type": "Feature", "id": 2, "geometry": {"type": "Point", "coordinates": [55.998333, -2.902778]}, "properties": {"balloonContentBody": "Битвы", "balloonContentFooter": "Подвал", "balloonContentHeader": "содержимое", "hintContent": "Битва при Данбаре 2"}},
+	{"type": "Feature", "id": 3, "geometry": {"type":"Circle", "coordinates": [55.998333, -2.522778], "radius": 10000}}
+    ]
+})
