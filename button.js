@@ -62,17 +62,42 @@ var mylacemark = new ymaps.Placemark([55.76, 37.64], {
         });
 
     myMap.geoObjects.add(mylacemark);
-   var objectManager = new ymaps.LoadingObjectManager(
-"new.json",
 
+var objectManager = new ymaps.LoadingObjectManager(
+"geoobjects.json",
 {
 clusterize: false,
 gridSize: 32,
 paddingTemplate: 'myCallback',
 });
 
+
 objectManager.objects.options.set('preset', 'islands#greenDotIcon');
 objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
-myMap.geoObjects.add(objectManager);
+
+myMap.events.add('boundschange', function (e) { 
+console.log(e.get('newZoom'));
+console.log(myMap.geoObjects);
+if (e.get('newZoom') != e.get('oldZoom')){
+	if (e.get('newZoom') > 8){
+		myMap.geoObjects.add(objectManager);
+	} else{
+		myMap.geoObjects.remove(objectManager);
+	}
+}
+
+});
+
+var objectManager2 = new ymaps.LoadingObjectManager(
+"points.json",
+{
+clusterize: true,
+gridSize: 125,
+paddingTemplate: 'myCallback',
+});
+
+objectManager2.objects.options.set('preset', 'islands#greenDotIcon');
+objectManager2.clusters.options.set('preset', 'islands#greenClusterIcons');
+myMap.geoObjects.add(objectManager2);
 
 }
