@@ -64,8 +64,9 @@ var mylacemark = new ymaps.Placemark([55.76, 37.64], {
     myMap.geoObjects.add(mylacemark);
    var objectManager = new ymaps.LoadingObjectManager(
 "new.json",
+
 {
-clusterize: true,
+clusterize: false,
 gridSize: 32,
 paddingTemplate: 'myCallback',
 });
@@ -73,4 +74,5 @@ paddingTemplate: 'myCallback',
 objectManager.objects.options.set('preset', 'islands#greenDotIcon');
 objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
 myMap.geoObjects.add(objectManager);
+
 }
