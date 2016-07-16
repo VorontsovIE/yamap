@@ -40,21 +40,14 @@ function init () {
 	var open_by_id;
 	
 	ListBox.events.add('click', function (e) {
-		//var obj = new ymaps.ObjectManager(
-		//{
-		//	clusterize: true,
-		//	gridSize: 125,
-		//});
             var item = e.get('target');
 			if (item.data.get('file') != undefined)
 			{	
 				if (item.data.select == true) {
 					console.log('wrong');
-					//myMap.geoObjects.remove(item.data.obj)
 					item.data.select = false;
 				} else {
 				item.data.select = true;
-				//item.data.obj = obj;
 				console.log(item.data.select);
 				var url = item.data.get('file')
 				console.log('something')
@@ -63,15 +56,16 @@ function init () {
 					url: url,
 					dataType: 'json',
 				}).done(function(data) {
+					myGeoObjects = [];
 					console.log (data);
 					for (var i in data){
-						myPlacemark = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
+						myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 							hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
 							preset: url,
 						});
 						
 						fn = function(j){
-							myPlacemark.events.add(['click'
+							myGeoObjects[j].events.add(['click'
 							], function (e) {
 								if (open_by_id != j + url) {
 									$jq('#log').show();
@@ -86,8 +80,15 @@ function init () {
 							});				
 						};
 						fn(i);
-						myMap.geoObjects.add(myPlacemark)
-					}
+						//myMap.geoObjects.add(myPlacemark)
+					};
+				clusterer = new ymaps.Clusterer({
+					clusterDisableClickZoom: true,
+					gridSize: 15,
+					hasBalloon: false});
+				clusterer.add(myGeoObjects);
+				myMap.geoObjects.add(clusterer);
+				
 				});
 			}}
 		});
