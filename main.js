@@ -7,38 +7,88 @@ function init () {
             zoom: 1,
             controls: []
         });
+	var ListBox = new ymaps.control.ListBox({
+		data: {
+			content: 'Список'
+		},
+		items: [
+			new ymaps.control.ListBoxItem(
+				{data:{
+					content: 'тест 0',
+					file: 'data\\test_0.json',
+					select: false
+			}}),
+			new ymaps.control.ListBoxItem(
+				{data:{
+					content: 'тест 1',
+					file: 'data\\test_1.json',
+					select: false,
+			}}),
+			new ymaps.control.ListBoxItem(
+				{data:{
+					content: 'Тест 2',
+					file: 'data\\test_2.json',
+					select: false,
+			}})
+		]
+	});
+	myMap.controls.add(ListBox);
+
 
     $jq('#log').toggle();
 	
 	var open_by_id;
 	
-	$jq.ajax({
-        url: "test_6.json",
-		dataType: 'json',
-    }).done(function(data) {
-     	console.log (data)
-		for (var i in data){
-			myPlacemark = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
-				hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]
-			});
-			
-			fn = function(j){
-				myPlacemark.events.add(['click'
-				], function (e) {
-					if (open_by_id != j) {
-						$jq('#log').show();
-						information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "\n" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "\n" + "Ref: " + data[j]["url"];	
-						log.innerText = information;
-						open_by_id = j
+	ListBox.events.add('click', function (e) {
+		//var obj = new ymaps.ObjectManager(
+		//{
+		//	clusterize: true,
+		//	gridSize: 125,
+		//});
+            var item = e.get('target');
+			if (item.data.get('file') != undefined)
+			{	
+				if (item.data.select == true) {
+					console.log('wrong');
+					//myMap.geoObjects.remove(item.data.obj)
+					item.data.select = false;
+				} else {
+				item.data.select = true;
+				//item.data.obj = obj;
+				console.log(item.data.select);
+				var url = item.data.get('file')
+				console.log('something')
+
+				$jq.ajax({
+					url: url,
+					dataType: 'json',
+				}).done(function(data) {
+					console.log (data);
+					for (var i in data){
+						myPlacemark = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
+							hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
+							preset: url,
+						});
+						
+						fn = function(j){
+							myPlacemark.events.add(['click'
+							], function (e) {
+								if (open_by_id != j + url) {
+									$jq('#log').show();
+									information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "\n" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "\n" + "Ref: " + data[j]["url"];	
+									log.innerText = information;
+									open_by_id = j + url
+								}
+								else {
+									$jq('#log').hide();
+									open_by_id = -1;
+								}
+							});				
+						};
+						fn(i);
+						myMap.geoObjects.add(myPlacemark)
 					}
-					else {
-						$jq('#log').hide();
-						open_by_id = -1;
-					}
-				});				
-			};
-			fn(i);
-			myMap.geoObjects.add(myPlacemark)
-		}
-	});
+				});
+			}}
+		});
 }
