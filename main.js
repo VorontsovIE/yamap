@@ -1,5 +1,15 @@
 ymaps.ready(init);
 
+function isEmpty(obj) {
+    if (obj == null) return true;
+    if (obj.length > 0)    return false;
+    if (obj.length === 0)  return true;
+    for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) return false;
+    }
+    return true;
+}
+
 function init () {
     var log = document.getElementById('log'),
         myMap = new ymaps.Map("map", {
@@ -9,24 +19,24 @@ function init () {
         });
 	var ListBox = new ymaps.control.ListBox({
 		data: {
-			content: 'Список'
+			content: 'РљР°С‚РµРіРѕСЂРёРё'
 		},
 		items: [
 			new ymaps.control.ListBoxItem(
 				{data:{
-					content: 'тест 0',
+					content: 'РўРµСЃС‚ 0',
 					file: 'data\\test_0.json',
 					select: false
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
-					content: 'тест 1',
+					content: 'РўРµСЃС‚ 1',
 					file: 'data\\test_1.json',
 					select: false,
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
-					content: 'Тест 2',
+					content: 'РўРµСЃС‚ 2',
 					file: 'data\\test_2.json',
 					select: false,
 			}})
@@ -45,12 +55,23 @@ function init () {
 			{	
 				if (item.data.select == true) {
 					console.log('wrong');
+					var iter = myMap.geoObjects.getIterator();
+					var obj = iter.getNext();
+					while (isEmpty(obj) == false) {
+						console.log(obj);
+						console.log(obj.options.get('id'));
+						if (obj.options.get('id')==item.data.get('file'))
+						{
+							myMap.geoObjects.remove(obj);
+						}
+						obj = iter.getNext();
+					}
 					item.data.select = false;
 				} else {
 				item.data.select = true;
 				console.log(item.data.select);
 				var url = item.data.get('file')
-				console.log('something')
+				console.log(item.data.get('content'))
 
 				$jq.ajax({
 					url: url,
@@ -60,8 +81,8 @@ function init () {
 					console.log (data);
 					for (var i in data){
 						myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
-							hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
-							preset: url,
+					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
+							preset: url
 						});
 						
 						fn = function(j){
@@ -85,7 +106,8 @@ function init () {
 				clusterer = new ymaps.Clusterer({
 					clusterDisableClickZoom: true,
 					gridSize: 15,
-					hasBalloon: false});
+					hasBalloon: false,
+					id: url});
 				clusterer.add(myGeoObjects);
 				myMap.geoObjects.add(clusterer);
 				
