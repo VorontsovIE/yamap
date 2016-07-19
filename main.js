@@ -5,8 +5,8 @@ function change_url(year_from, year_to, type) {
 	return (base_url + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type);
 }
 
-var year_from = 100;
-var year_to = 2000;
+var year_from = 300;
+var year_to = 700;
 var type = '';
 
 col = '#eeee'
@@ -30,10 +30,10 @@ $jq(function() {
 		create_request(change_url(year_from, year_to, type), col)
     },
     range: true,
-    min: -7000,
-    max: 3000,
+    min: 1,
+    max: 2999,
 	animate: true,
-    values: [ -700, 300 ],
+    values: [ 300, 700 ],
     slide: function( event, ui ) {
       $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
     }
@@ -52,6 +52,33 @@ function init () {
         controls: []
     },{suppressMapOpenBlock: true});
 	console.log(other_element.slider("values", 1));
+	
+	myMap.action.setCorrection(function (tick) { // проверка передвижения экрана, не пускает выше и ниже карты (там где уже нет тайлов)
+            var projection = myMap.options.get('projection');
+            var mapSize = myMap.container.getSize();
+            var tickCenter = projection.fromGlobalPixels(tick.globalPixelCenter, tick.zoom);
+            var top = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] - mapSize[1] / 2];
+            var bot = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] + mapSize[1] / 2];
+            var tickTop = projection.fromGlobalPixels(top, tick.zoom);
+            var tickBot = projection.fromGlobalPixels(bot, tick.zoom);
+            if (tickTop[0] > 85) {
+                tick.globalPixelCenter = projection.toGlobalPixels(
+                    [85, tickCenter[1]],
+                    tick.zoom
+                );
+                tick.globalPixelCenter = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] + mapSize[1] / 2];
+                tick.duration = 0;
+            }
+            if (tickBot[0] < -85) {
+                tick.globalPixelCenter = projection.toGlobalPixels(
+                    [-85, tickCenter[1]],
+                    tick.zoom
+                );
+                tick.globalPixelCenter = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] - mapSize[1] / 2];
+                tick.duration = 0;
+            }
+            return tick;
+        });
 	
 	var ListBox = new ymaps.control.ListBox({
 		data: {
