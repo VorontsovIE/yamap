@@ -42,7 +42,14 @@ function init () {
 					file: 'data\\test_2.json',
 					color:'islands#yellow',
 					select: false,
-			}})
+			}}),
+			new ymaps.control.ListBoxItem(
+				{data:{
+					content: 'military_conflict',
+					file: 'http://172.20.10.5:4567/?year_from=1&year_to=2000',
+					color:'islands#green',
+					select: false,
+			}}),
 		]
 	});
 	myMap.controls.add(ListBox);
@@ -83,7 +90,8 @@ function init () {
 					dataType: 'json',
 				}).done(function(data) {
 					myGeoObjects = [];
-					console.log (data);
+					console.log ('data_loaded');
+					console.log(data);
 					for (var i in data){
 						myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
@@ -111,7 +119,7 @@ function init () {
 				clusterer = new ymaps.Clusterer({
 					preset: item.data.get('color')+'ClusterIcons',
 					clusterDisableClickZoom: true,
-					gridSize: 15,
+					gridSize: 50,
 					hasBalloon: false,
 					id: url
 					});
