@@ -1,4 +1,15 @@
-ymaps.ready(init);
+ymaps.ready(init)
+
+function change_url(year_from, year_to, type) {
+	var base_url = 'http://172.20.10.5:4567/?'  //year_from=' // 1&year_to=2000'
+	return (base_url + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type);
+}
+
+var year_from = 100;
+var year_to = 2000;
+var type = '';
+
+col = '#eeee'
 
 function isEmpty(obj) {
     if (obj == null) return true;
@@ -8,15 +19,40 @@ function isEmpty(obj) {
         if (hasOwnProperty.call(obj, key)) return false;
     }
     return true;
-}
+};
+
+$jq(function() {
+  $( "#slider-range" ).slider({
+	stop: function(event, ui) {
+		year_from = $("#slider-range").slider("values", 0);
+		year_to = $("#slider-range").slider("values", 1);
+		myMap.geoObjects.removeAll();
+		create_request(change_url(year_from, year_to, type), col)
+    },
+    range: true,
+    min: -7000,
+    max: 3000,
+	animate: true,
+    values: [ -700, 300 ],
+    slide: function( event, ui ) {
+      $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+    }
+  });
+  $( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) +
+    " - " + $( "#slider-range" ).slider( "values", 1 ) );
+});
+  
 
 function init () {
-    var log = document.getElementById('log'),
-        myMap = new ymaps.Map("map", {
-            center: [48.856929, 2.341198],
-            zoom: 1,
-            controls: []
-        });
+    var log = document.getElementById('log');
+	other_element = $('#slider-range');
+    myMap = new ymaps.Map("map", {
+        center: [48.856929, 15.341198],
+        zoom: 3,
+        controls: []
+    },{suppressMapOpenBlock: true});
+	console.log(other_element.slider("values", 1));
+	
 	var ListBox = new ymaps.control.ListBox({
 		data: {
 			content: 'Категории'
@@ -25,28 +61,28 @@ function init () {
 			new ymaps.control.ListBoxItem(
 				{data:{
 					content: 'Тест 0',
-					file: 'data\\test_0.json',
+					type: 'data\\test_0.json',
 					color: 'islands#darkOrange',
 					select: false
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
 					content: 'Тест 1',
-					file: 'data\\test_1.json',
+					type: 'data\\test_1.json',
 					color: 'islands#violet',
 					select: false,
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
 					content: 'Тест 2',
-					file: 'data\\test_2.json',
+					type: 'data\\test_2.json',
 					color:'islands#yellow',
 					select: false,
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
+					type: 'military_conflict',
 					content: 'military_conflict',
-					file: 'http://172.20.10.5:4567/?year_from=1&year_to=2000',
 					color:'islands#green',
 					select: false,
 			}}),
@@ -54,13 +90,61 @@ function init () {
 	});
 	myMap.controls.add(ListBox);
 
+
     $jq('#log').toggle();
 	
 	var open_by_id;
+
+	create_request = function(url, col, type) {
+		$jq.ajax({
+			url: url,
+			dataType: 'json',
+		}).done(function(data) {
+			myGeoObjects = [];
+			console.log ('data_loaded');
+			console.log(data);
+			for (var i in data){
+				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
+			hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
+					preset: col + 'DotIcon'
+				});
+				
+				fn = function(j){
+					myGeoObjects[j].events.add(['click'
+					], function (e) {
+						if (open_by_id != j + url) {
+							$jq('#log').show();
+							information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "\n" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "\n" + "Ref: " + data[j]["url"];	
+							log.innerText = information;
+							open_by_id = j + url
+						}
+						else {
+							$jq('#log').hide();
+							open_by_id = -1;
+						}
+					});				
+				};
+				fn(i);
+				//myMap.geoObjects.add(myPlacemark)
+			};
+		clusterer = new ymaps.Clusterer({
+			preset: col+'ClusterIcons',
+			clusterDisableClickZoom: true,
+			gridSize: 50,
+			hasBalloon: false,
+			id: type,
+			});
+			console.log(clusterer.options.get("preset"));
+		clusterer.add(myGeoObjects);
+		myMap.geoObjects.add(clusterer);
+		
+		});
+	}
+
 	
 	ListBox.events.add('click', function (e) {
             var item = e.get('target');
-			if (item.data.get('file') != undefined)
+			if (item.data.get('type') != undefined)
 			{	
 				if (item.data.select == true) {
 					console.log('wrong');
@@ -69,7 +153,7 @@ function init () {
 					while (isEmpty(obj) == false) {
 						console.log(obj);
 						console.log(obj.options.get('id'));
-						if (obj.options.get('id')==item.data.get('file'))
+						if (obj.options.get('id') == item.data.get('type'))
 						{
 							myMap.geoObjects.remove(obj);
 						}
@@ -79,55 +163,12 @@ function init () {
 				} else {
 				item.data.select = true;
 				console.log(item.data.select);
-				var url = item.data.get('file')
-				var color = item.data.get('color')
-				console.log(item.data.get('content'));
-				col=item.data.get('color')+'DotIcon';
+				type = item.data.get('type')
+				color = item.data.get('color')
+				console.log(item.data.get('type'));
+				col=item.data.get('color');
 				console.log(col);
-
-				$jq.ajax({
-					url: url,
-					dataType: 'json',
-				}).done(function(data) {
-					myGeoObjects = [];
-					console.log ('data_loaded');
-					console.log(data);
-					for (var i in data){
-						myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
-					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
-							preset: col
-						});
-						
-						fn = function(j){
-							myGeoObjects[j].events.add(['click'
-							], function (e) {
-								if (open_by_id != j + url) {
-									$jq('#log').show();
-									information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "\n" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "\n" + "Ref: " + data[j]["url"];	
-									log.innerText = information;
-									open_by_id = j + url
-								}
-								else {
-									$jq('#log').hide();
-									open_by_id = -1;
-								}
-							});				
-						};
-						fn(i);
-						//myMap.geoObjects.add(myPlacemark)
-					};
-				clusterer = new ymaps.Clusterer({
-					preset: item.data.get('color')+'ClusterIcons',
-					clusterDisableClickZoom: true,
-					gridSize: 50,
-					hasBalloon: false,
-					id: url
-					});
-					console.log(clusterer.options.get("preset"));
-				clusterer.add(myGeoObjects);
-				myMap.geoObjects.add(clusterer);
-				
-				});
+				create_request(change_url(year_from, year_to, type), col, type);
 			}}
 		});
 }
