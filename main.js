@@ -26,24 +26,26 @@ function init () {
 				{data:{
 					content: 'Тест 0',
 					file: 'data\\test_0.json',
+					color: 'islands#darkOrange',
 					select: false
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
 					content: 'Тест 1',
 					file: 'data\\test_1.json',
+					color: 'islands#violet',
 					select: false,
 			}}),
 			new ymaps.control.ListBoxItem(
 				{data:{
 					content: 'Тест 2',
 					file: 'data\\test_2.json',
+					color:'islands#yellow',
 					select: false,
 			}})
 		]
 	});
 	myMap.controls.add(ListBox);
-
 
     $jq('#log').toggle();
 	
@@ -71,7 +73,10 @@ function init () {
 				item.data.select = true;
 				console.log(item.data.select);
 				var url = item.data.get('file')
-				console.log(item.data.get('content'))
+				var color = item.data.get('color')
+				console.log(item.data.get('content'));
+				col=item.data.get('color')+'DotIcon';
+				console.log(col);
 
 				$jq.ajax({
 					url: url,
@@ -82,7 +87,7 @@ function init () {
 					for (var i in data){
 						myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
-							preset: url
+							preset: col
 						});
 						
 						fn = function(j){
@@ -104,10 +109,13 @@ function init () {
 						//myMap.geoObjects.add(myPlacemark)
 					};
 				clusterer = new ymaps.Clusterer({
+					preset: item.data.get('color')+'ClusterIcons',
 					clusterDisableClickZoom: true,
 					gridSize: 15,
 					hasBalloon: false,
-					id: url});
+					id: url
+					});
+					console.log(clusterer.options.get("preset"));
 				clusterer.add(myGeoObjects);
 				myMap.geoObjects.add(clusterer);
 				
