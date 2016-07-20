@@ -31,7 +31,7 @@ $jq(function() {
     },
     range: true,
     min: 1,
-    max: 2999,
+    max: 2016, //Data().getFullYear(),
 	animate: true,
     values: [ 300, 700 ],
     slide: function( event, ui ) {
@@ -48,9 +48,9 @@ function init () {
 	other_element = $('#slider-range');
     myMap = new ymaps.Map("map", {
         center: [48.856929, 15.341198],
-        zoom: 3,
+        zoom: 2,
         controls: []
-    },{suppressMapOpenBlock: true});
+    },{suppressMapOpenBlock: true, minZoom: 2});
 	console.log(other_element.slider("values", 1));
 	
 	myMap.action.setCorrection(function (tick) { // проверка передвижения экрана, не пускает выше и ниже карты (там где уже нет тайлов)
@@ -76,9 +76,10 @@ function init () {
                 );
                 tick.globalPixelCenter = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] - mapSize[1] / 2];
                 tick.duration = 0;
-            }
+            } 
             return tick;
         });
+		
 	
 	var ListBox = new ymaps.control.ListBox({
 		data: {
@@ -136,13 +137,17 @@ function init () {
 					preset: col + 'DotIcon'
 				});
 				
+				//console.log(data[i]["coord"]["comment"])
+				
 				fn = function(j){
 					myGeoObjects[j].events.add(['click'
 					], function (e) {
 						if (open_by_id != j + url) {
 							$jq('#log').show();
-							information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "\n" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "\n" + "Ref: " + data[j]["url"];	
-							log.innerText = information;
+							var link_html = '<a href="' + data[j]['url'] + '"target="_blank">см. Википедию</a>';
+							console.log(link_html)
+							information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "<br>" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "<br>" + "Ref: " + link_html;	
+							$(log).html(information);
 							open_by_id = j + url
 						}
 						else {
