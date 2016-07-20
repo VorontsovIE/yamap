@@ -34,17 +34,20 @@
         }
 
         #log {
-            width: 315px;
-            height: 150px;
+            width: 300px;
+			height: 400px;
+			text-align: justify;
             position: absolute;
             left: 5px;
-            bottom: 5px;
+            bottom: 80px;
             opacity: 0.9;
             padding: 5px;
-            font-family: Courier, sans-serif;
-            font-size: 11px;
-            background: white;
+            font-family: century gothic;
+            font-size: 12px;
             overflow: auto;
+			border: 3px solid #F0F0F0;
+			background: #f7f7f7; 
+			border-radius: 10px;
         }
     </style>
 
@@ -55,8 +58,8 @@
 <div id="map"></div>
 <div id="log"></div>
 <p>
-  <label for="amount">Выберите период:</label>
-  <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold; background: none;">
+  <label for="amount" readonly style="border:0; color:#000000; font-family:century gothic; background: none;">Выберите период:</label>
+  <input type="text" id="amount" readonly style="border:0; color:#606060; font-size:16px; font-weight:bold; font-family:century gothic; background: none;">
 </p>
  
 <div id="slider-range"></div>

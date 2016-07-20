@@ -146,7 +146,13 @@ function init () {
 							$jq('#log').show();
 							var link_html = '<a href="' + data[j]['url'] + '"target="_blank">см. Википедию</a>';
 							console.log(link_html)
-							information = data[j]["comment"] + "\n" + "Sides:" + data[j]["data"]["sides"] + "<br>" + "Date:" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + " to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + "<br>" + "Ref: " + link_html;	
+							information = "<b>" + data[j]["title"] + "</b><br><br>" +
+								data[j]["comment"] + "<br>" +
+								"<i>Sides:</i>" + data[j]["data"]["sides"] +
+								"<br>" + "<i>Date:</i>" + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] +
+									" to " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] +
+							    "<br>" +
+								"Ref: " + link_html;	
 							$(log).html(information);
 							open_by_id = j + url
 						}
