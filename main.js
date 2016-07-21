@@ -1,11 +1,15 @@
+// ToDo: Кластеризатор склеивает метки с одинаковыми координатами, а их надо раздвинуть.
 var year_from = 1500;
 var year_to = 1900;
 var type = '';
 color = '#eee'; // Цвет событий после обновления слайдера будет общим для всех категорий. Надо пофиксить
 
-function get_events_url(year_from, year_to, type) {
+
+var countries = '';
+
+function get_events_url(year_from, year_to, type, countries) {
 	var base_url = 'http://172.20.10.5:4567/?';  //year_from=' // 1&year_to=2000'
-	return (base_url + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type);
+	return (base_url + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries);
 }
 
 function isEmpty(obj) {
@@ -19,12 +23,21 @@ function isEmpty(obj) {
 };
 
 $jq(function() {
+	$jq('#country-selector input').change(function(event) {
+		console.log('changed');  
+		myMap.geoObjects.removeAll();
+		countries = ($(event.target).val().toLowerCase());
+		create_request(get_events_url(year_from, year_to, type, countries), color);
+	});
+	
+	
+	
   $( "#slider-range" ).slider({
 	stop: function(event, ui) {
 		year_from = $("#slider-range").slider("values", 0);
 		year_to = $("#slider-range").slider("values", 1);
 		myMap.geoObjects.removeAll();
-		create_request(get_events_url(year_from, year_to, type), color)
+		create_request(get_events_url(year_from, year_to, type, countries), color)
     },
     range: true,
     min: 1,
@@ -83,27 +96,6 @@ function init () {
 		items: [
 			new ymaps.control.ListBoxItem(
 				{data:{
-					content: 'Тест 0',
-					type: 'data\\test_0.json',
-					color: 'islands#darkOrange',
-					select: false
-			}}),
-			new ymaps.control.ListBoxItem(
-				{data:{
-					content: 'Тест 1',
-					type: 'data\\test_1.json',
-					color: 'islands#violet',
-					select: false,
-			}}),
-			new ymaps.control.ListBoxItem(
-				{data:{
-					content: 'Тест 2',
-					type: 'data\\test_2.json',
-					color:'islands#yellow',
-					select: false,
-			}}),
-			new ymaps.control.ListBoxItem(
-				{data:{
 					type: 'military_conflict',
 					content: 'military_conflict',
 					color:'islands#green',
@@ -119,7 +111,8 @@ function init () {
 	var open_by_id;
 
 	create_request = function(url, color, type) {
-		$jq.ajax({
+			console.log(url);
+		$jq.ajax({ 
 			url: url,
 			dataType: 'json',
 		}).done(function(data) {
@@ -155,14 +148,26 @@ function init () {
 			};
 			clusterer = new ymaps.Clusterer({
 				preset: color + 'ClusterIcons',
-				clusterDisableClickZoom: false,
+				maxZoom: 13,
+				clusterHideIconOnBalloonOpen: false,
+				geoObjectHideIconOnBalloonOpen: false,
+				clusterDisableClickZoom: true,
 				gridSize: 50,
-				hasBalloon: false,
+				//hasBalloon: false,
 				id: type,
 				});
 			clusterer.add(myGeoObjects);
 			myMap.geoObjects.add(clusterer);
 		});
+		
+		getPointData = function (index) {
+            return {
+                balloonContentBody: 'балун <strong>метки ' + index + '</strong>',
+                clusterCaption: 'метка <strong>' + index + '</strong>'
+            };
+        };
+		
+		
 	}
 
 	
@@ -185,7 +190,7 @@ function init () {
 					item.data.select = true;
 					type = item.data.get('type')
 					color = item.data.get('color')
-					create_request(get_events_url(year_from, year_to, type), color, type);
+					create_request(get_events_url(year_from, year_to, type, countries), color, type);
 				}
 			}
 		});
