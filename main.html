@@ -50,10 +50,11 @@
 			border-radius: 10px;
         }
 		
-		#slider-caption {
+		#slider-caption, #country-selector {
 			margin: 0;
 			margin-left: 1%;
 			padding: 5px;
+			display: inline-block;
 		}
     </style>
 
@@ -67,7 +68,12 @@
   <label for="amount" readonly style="border:0; color:#000000; font-family:century gothic; background: none;">Выберите период:</label>
   <input type="text" id="amount" readonly style="border:0; color:#606060; font-size:16px; font-weight:bold; font-family:century gothic; background: none;">
 </div>
+<div id="country-selector">
+	<label for="amount" readonly style="border:0; color:#000000; font-family:century gothic; background: none;">Введите страну:</label>
+	<input type="text" maxlength="25" size="20" style="bottom 50%" >
+</div>
 <div id="slider-range"></div>
+
 	
 </body>
 
