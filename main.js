@@ -4,8 +4,8 @@ var year_to = 1900;
 var type = '';
 color = '#eee'; // Цвет событий после обновления слайдера будет общим для всех категорий. Надо пофиксить
 
-
 var countries = '';
+var country;
 
 function get_events_url(year_from, year_to, type, countries) {
 	var base_url = 'http://172.20.10.5:4567/?';  //year_from=' // 1&year_to=2000'
@@ -59,7 +59,6 @@ function init () {
         zoom: 2,
         controls: []
     },{suppressMapOpenBlock: true, minZoom: 2});
-	
 	// копипаста отсюда: https://yandex.ru/blog/mapsapi/36558/56a9547cb15b79e31e0d08a6
 	myMap.action.setCorrection(function (tick) { // проверка передвижения экрана, не пускает выше и ниже карты (там где уже нет тайлов)
             var projection = myMap.options.get('projection');
@@ -88,6 +87,8 @@ function init () {
             return tick;
         });
 		
+		
+		
 	
 	var ListBox = new ymaps.control.ListBox({
 		data: {
@@ -103,13 +104,33 @@ function init () {
 			}}),
 		]
 	});
+	
+	
+	$('select').select2();
+	
+	
 	myMap.controls.add(ListBox);
-
-
+	'<p><input type="text" maxlength="25" size="20"></p>'
     $jq('#log').toggle();
 	
 	var open_by_id;
-
+	create_countries = function() {
+		$jq.ajax({
+			url: 'http://172.20.10.5:4567/countries',
+			dataType: 'json',
+		}).done(function(data){
+			var countries=[];
+			for (var country in data){
+				countries.push({id: country, text: country})
+			}
+			console.log(countries);
+			$(".countries").select2({
+				data: data
+			})
+		})
+	}
+	create_countries();
+	//console.log(countries);
 	create_request = function(url, color, type) {
 			console.log(url);
 		$jq.ajax({ 
@@ -197,3 +218,4 @@ function init () {
 }
 
 ymaps.ready(init);
+
