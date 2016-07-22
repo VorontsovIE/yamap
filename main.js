@@ -1,10 +1,8 @@
-// ToDo: Кластеризатор склеивает метки с одинаковыми координатами, а их надо раздвинуть.
-
 var BaseURL = 'http://localhost:4567';
 var year_from = 1500;
 var year_to = 1900;
 var type = 'military_conflict';
-color = '#eee'; // Цвет событий после обновления слайдера будет общим для всех категорий. Надо пофиксить
+color = '#eee';
 
 var countries = '';
 var country;
@@ -183,7 +181,7 @@ function init () {
 				geoObjectHideIconOnBalloonOpen: false,
 				clusterDisableClickZoom: true,
 				gridSize: 50,
-				//hasBalloon: false,
+				hasBalloon: false,
 				id: type,
 				});
 			clusterer.add(myGeoObjects);
