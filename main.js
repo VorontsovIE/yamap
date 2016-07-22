@@ -1,11 +1,12 @@
 // ToDo: Кластеризатор склеивает метки с одинаковыми координатами, а их надо раздвинуть.
 var year_from = 1500;
 var year_to = 1900;
-var type = '';
+var type = 'military_conflict';
 color = '#eee'; // Цвет событий после обновления слайдера будет общим для всех категорий. Надо пофиксить
 
 var countries = '';
 var country;
+
 
 function get_events_url(year_from, year_to, type, countries) {
 	var base_url = 'http://172.20.10.5:4567/?';  //year_from=' // 1&year_to=2000'
@@ -22,14 +23,13 @@ function isEmpty(obj) {
     return true;
 };
 
-$jq(function() {
-	$jq('#country-selector input').change(function(event) {
-		console.log('changed');  
+$jq(function () {
+	$('#country-selector').change(function(event) {
+		countries = ($(event.target).val());
+		if (countries == null || countries.join == null) { countries=[]; }
 		myMap.geoObjects.removeAll();
-		countries = ($(event.target).val().toLowerCase());
-		create_request(get_events_url(year_from, year_to, type, countries), color);
+		create_request(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase()), color);
 	});
-	
 	
 	
   $( "#slider-range" ).slider({
@@ -37,6 +37,7 @@ $jq(function() {
 		year_from = $("#slider-range").slider("values", 0);
 		year_to = $("#slider-range").slider("values", 1);
 		myMap.geoObjects.removeAll();
+		create_countries();
 		create_request(get_events_url(year_from, year_to, type, countries), color)
     },
     range: true,
@@ -51,6 +52,7 @@ $jq(function() {
   $( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) +
     " - " + $( "#slider-range" ).slider( "values", 1 ) );
 });
+
   
 
 function init () {
@@ -106,33 +108,30 @@ function init () {
 	});
 	
 	
-	$('select').select2();
-	
-	
 	myMap.controls.add(ListBox);
 	'<p><input type="text" maxlength="25" size="20"></p>'
     $jq('#log').toggle();
 	
 	var open_by_id;
 	create_countries = function() {
+		var url='http://172.20.10.5:4567/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
 		$jq.ajax({
-			url: 'http://172.20.10.5:4567/countries',
+			url: url, 
 			dataType: 'json',
 		}).done(function(data){
-			var countries=[];
+			var country_list = [];
 			for (var country in data){
-				countries.push({id: country, text: country})
+				country_list.push({id: data[country][1], text:data[country][0] +' '+ data[country][1]})
 			}
-			console.log(countries);
-			$(".countries").select2({
-				data: data
-			})
+			$("select.countries").select2('destroy').empty().select2({
+				data: country_list
+			});
 		})
 	}
+	$("select.countries").select2();
 	create_countries();
-	//console.log(countries);
+	
 	create_request = function(url, color, type) {
-			console.log(url);
 		$jq.ajax({ 
 			url: url,
 			dataType: 'json',
@@ -215,6 +214,8 @@ function init () {
 				}
 			}
 		});
+	
+	create_request(get_events_url(year_from, year_to, type, ''), color);
 }
 
 ymaps.ready(init);

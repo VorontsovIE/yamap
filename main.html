@@ -37,7 +37,7 @@
 			height: 100%;
 		}
 		#map{
-            height: 90%;
+            height: 88%;
 		}
 
         #log {
@@ -54,6 +54,7 @@
 			border: 3px solid #F0F0F0;
 			background: #f7f7f7; 
 			border-radius: 10px;
+			font-family:arial;
         }
 		
 		#slider-caption, #country-selector {
@@ -62,9 +63,10 @@
 			padding: 5px;
 			display: inline-block;
 		}
-		.js-example-basic-multiple 
+		#country-selector select 
 		{
 			width:300px;
+			font-family:arial;
 		}
     </style>
 
@@ -75,11 +77,11 @@
 <div id="map"></div>
 <div id="log"></div>
 <div id="slider-caption">
-  <label for="amount" readonly style="border:0; color:#000000; font-family:century gothic; background: none;">Выберите период:</label>
+  <label for="amount" readonly style="border:0; color:#000000; font-family:arial; background: none;">Выберите период:</label>
   <input type="text" id="amount" readonly style="border:0; color:#606060; font-size:16px; font-weight:bold; font-family:century gothic; background: none;">
 </div>
 <div id="country-selector">
-	<label for="amount" readonly style="border:0; color:#000000; font-family:century gothic; background: none;">Введите страну:</label>
+	<label for="amount" readonly style="border:0; color:#000000; font-family:arial; background: none;">Введите страну:</label>
 	<!-- <input type="text" maxlength="25" size="20" style="bottom 50%" > -->
 	<select class="countries" multiple="multiple">
 	</select>
