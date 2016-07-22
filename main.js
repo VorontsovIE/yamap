@@ -1,4 +1,6 @@
 // ToDo: Кластеризатор склеивает метки с одинаковыми координатами, а их надо раздвинуть.
+
+var BaseURL = 'http://localhost:4567';
 var year_from = 1500;
 var year_to = 1900;
 var type = 'military_conflict';
@@ -9,8 +11,7 @@ var country;
 
 
 function get_events_url(year_from, year_to, type, countries) {
-	var base_url = 'http://172.20.10.5:4567/?';  //year_from=' // 1&year_to=2000'
-	return (base_url + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries);
+	return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries);
 }
 
 function isEmpty(obj) {
@@ -120,7 +121,7 @@ function init () {
 	
 	var open_by_id;
 	create_countries = function() {
-		var url='http://172.20.10.5:4567/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
+		var url = BaseURL + '/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
 		$jq.ajax({
 			url: url, 
 			dataType: 'json',
