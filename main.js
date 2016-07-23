@@ -22,11 +22,16 @@ function isEmpty(obj) {
     return true;
 };
 
+var chosen = [];
 $jq(function () {
-	$('#country-selector').change(function(event) {
-		countries = ($(event.target).val());
+	$('#country-selector select').on('change', function(event) {
+		//.val([chosen]).trigger("change");
+		countries = $(event.target).val();
+		chosen = countries;
 		if (countries == null || countries.join == null) { countries=[]; }
 		myMap.geoObjects.removeAll();
+		//countries.concat(chosen);
+		console.log('cntry');
 		create_request(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase()), color);
 	});
 	
@@ -37,7 +42,8 @@ $jq(function () {
 		year_to = $("#slider-range").slider("values", 1);
 		myMap.geoObjects.removeAll();
 		create_countries();
-		create_request(get_events_url(year_from, year_to, type, countries), color)
+		//console.log(chosen);
+		create_request(get_events_url(year_from, year_to, type, chosen), color)
     },
     range: true,
     min: 1,
@@ -91,7 +97,7 @@ function init () {
 		
 		
 	
-	var ListBox = new ymaps.control.ListBox({
+	var category_list = new ymaps.control.ListBox({
 		data: {
 			content: 'Категории'
 		},
@@ -107,7 +113,7 @@ function init () {
 	});
 	
 	
-	myMap.controls.add(ListBox);
+	myMap.controls.add(category_list);
 	'<p><input type="text" maxlength="25" size="20"></p>'
     $jq('#log').toggle();
 	
@@ -125,6 +131,8 @@ function init () {
 			$("select.countries").select2('destroy').empty().select2({
 				data: country_list
 			});
+			$('#country-selector select').val(chosen).trigger("change");
+		
 		})
 	}
 	$("select.countries").select2();
@@ -137,6 +145,7 @@ function init () {
 		}).done(function(data) {
 			myGeoObjects = [];
 			console.log('data_loaded');
+			console.log (url);
 			for (var i in data){
 				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 			hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
@@ -190,7 +199,7 @@ function init () {
 	}
 
 	
-	ListBox.events.add('click', function (e) {
+	category_list.events.add('click', function (e) {
             var item = e.get('target');
 			if (item.data.get('type') != undefined)
 			{	
