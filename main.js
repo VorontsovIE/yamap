@@ -41,9 +41,10 @@ $jq(function () {
 		year_from = $("#slider-range").slider("values", 0);
 		year_to = $("#slider-range").slider("values", 1);
 		myMap.geoObjects.removeAll();
-		create_countries();
+		create_countries(function(){
+			create_request(get_events_url(year_from, year_to, type, chosen), color)
+		});
 		//console.log(chosen);
-		create_request(get_events_url(year_from, year_to, type, chosen), color)
     },
     range: true,
     min: 1,
@@ -118,8 +119,9 @@ function init () {
     $jq('#log').toggle();
 	
 	var open_by_id;
-	create_countries = function() {
+	create_countries = function(finish_callback) {
 		var url = BaseURL + '/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
+		console.log(url);
 		$jq.ajax({
 			url: url, 
 			dataType: 'json',
@@ -132,20 +134,22 @@ function init () {
 				data: country_list
 			});
 			$('#country-selector select').val(chosen).trigger("change");
-		
+			if (finish_callback) {
+				finish_callback();
+			}
 		})
 	}
 	$("select.countries").select2();
 	create_countries();
 	
 	create_request = function(url, color, type) {
+		console.log (url);
 		$jq.ajax({ 
 			url: url,
 			dataType: 'json',
 		}).done(function(data) {
 			myGeoObjects = [];
 			console.log('data_loaded');
-			console.log (url);
 			for (var i in data){
 				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 			hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
