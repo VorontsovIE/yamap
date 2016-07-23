@@ -159,29 +159,25 @@ function init () {
 			console.log (url);
 			for (var i in data){
 				//Добавление метки.
+				
+				var link_html = '<a href="' + data[i]['url'] + '" target="_blank">см. Википедию</a>';
+				var information = "<b>" + data[i]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[i]["comment"] + "<br>" + "<i>Sides:</i>" + data[i]["data"]["sides"] + "<br>" + "<i>Date:</i>"  + " from " + data[i]["period"]["from_date"]["day"] + "." + data[i]["period"]["from_date"]["month"] + "." + data[i]["period"]["from_date"]["year"] + " to " + data[i]["period"]["to_date"]["day"] + "." + data[i]["period"]["to_date"]["month"] + "." + data[i]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
+					
 				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
 					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
-					//hasBalloon: false,
-					balloonContentBody: 'weewqeweewqe',
-					balloonContentHeader: 'hhhhhhhhhe'},{
-						
-					openBalloonOnClick: false,
-					preset: color + 'DotIcon'
+					balloonContentBody: information,
+					balloonContentHeader: data[i]["title"]},{
+						openBalloonOnClick: false,
+						preset: color + 'DotIcon'
 				});
 				fn = function(j){
 					//Генерация текста в окно.
 					myGeoObjects[j].events.add('click', function (e) {
 						if (open_by_id != j + url) { // url добавляем для работы с метками с одним i (индексом), но из разных категорий.
 							$jq('#log').show();
-							var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
-							information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + 
-								data[j]["comment"] + "<br>" +
-								"<i>Sides:</i>" + data[j]["data"]["sides"] +
-								"<br>" + "<i>Date:</i>"  + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;	
 							$jq('#log').html(information);
 							open_by_id = j + url
 						}
-						
 						else {
 							$jq('#log').hide();
 							open_by_id = -1;
