@@ -1,4 +1,4 @@
-var BaseURL = 'http://geo-history.org:4567';
+var BaseURL = 'http://95.85.18.95:4567';
 var year_from = 1500;
 var year_to = 1900;
 var type = 'military_conflict';
