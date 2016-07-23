@@ -12,6 +12,7 @@ function get_events_url(year_from, year_to, type, countries) {
 	return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries);
 }
 
+//Перебор объектов не до бесконечности
 function isEmpty(obj) {
     if (obj == null) return true;
     if (obj.length > 0)    return false;
@@ -24,7 +25,9 @@ function isEmpty(obj) {
 
 var chosen = [];
 $jq(function () {
+
 	$('#country-selector select').on('change', function(event) {
+		//Ввод и считывание страны
 		//.val([chosen]).trigger("change");
 		countries = $(event.target).val();
 		chosen = countries;
@@ -36,6 +39,7 @@ $jq(function () {
 	});
 	
 	
+	//Ползунок
   $( "#slider-range" ).slider({
 	stop: function(event, ui) {
 		year_from = $("#slider-range").slider("values", 0);
@@ -62,12 +66,15 @@ $jq(function () {
   
 
 function init () {
+	//Инициализация карты
     myMap = new ymaps.Map("map", {
         center: [48.856929, 15.341198],
         zoom: 2,
         controls: []
     },{suppressMapOpenBlock: true, minZoom: 2});
-	// копипаста отсюда: https://yandex.ru/blog/mapsapi/36558/56a9547cb15b79e31e0d08a6
+
+	//Ограничение просмотра карты по вертикали
+	// Копипаста отсюда: https://yandex.ru/blog/mapsapi/36558/56a9547cb15b79e31e0d08a6
 	myMap.action.setCorrection(function (tick) { // проверка передвижения экрана, не пускает выше и ниже карты (там где уже нет тайлов)
             var projection = myMap.options.get('projection');
             var mapSize = myMap.container.getSize();
@@ -94,10 +101,8 @@ function init () {
             } 
             return tick;
         });
-		
-		
-		
-	
+
+	//Список с категориями. На карте.
 	var category_list = new ymaps.control.ListBox({
 		data: {
 			content: 'Категории'
@@ -142,6 +147,7 @@ function init () {
 	$("select.countries").select2();
 	create_countries();
 	
+	//Начинка. Формирование запроса.
 	create_request = function(url, color, type) {
 		console.log (url);
 		$jq.ajax({ 
@@ -152,14 +158,19 @@ function init () {
 			console.log('data_loaded');
 			console.log (url);
 			for (var i in data){
+				//Добавление метки.
 				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
-			hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"]},{
+					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
+					//hasBalloon: false,
+					balloonContentBody: 'weewqeweewqe',
+					balloonContentHeader: 'hhhhhhhhhe'},{
+						
+					openBalloonOnClick: false,
 					preset: color + 'DotIcon'
 				});
-				
 				fn = function(j){
-					myGeoObjects[j].events.add(['click'
-					], function (e) {
+					//Генерация текста в окно.
+					myGeoObjects[j].events.add('click', function (e) {
 						if (open_by_id != j + url) { // url добавляем для работы с метками с одним i (индексом), но из разных категорий.
 							$jq('#log').show();
 							var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
@@ -170,6 +181,7 @@ function init () {
 							$jq('#log').html(information);
 							open_by_id = j + url
 						}
+						
 						else {
 							$jq('#log').hide();
 							open_by_id = -1;
@@ -178,29 +190,33 @@ function init () {
 				};
 				fn(i);
 				//myMap.geoObjects.add(myPlacemark)
+				
 			};
-			clusterer = new ymaps.Clusterer({
-				preset: color + 'ClusterIcons',
-				maxZoom: 13,
-				clusterHideIconOnBalloonOpen: false,
-				geoObjectHideIconOnBalloonOpen: false,
+			
+			
+			//Кластеризация.
+			//clusterer.options.set('geoObjectOpenBalloonOnClick', true)
+			var clusterer = new ymaps.Clusterer({ 
+				gridSize: 64, 
+				hasBalloon: true,
+				margin: 10,
+				showInAlphabeticalOrder: true,
+				zoomMargin: 0, 
 				clusterDisableClickZoom: true,
-				gridSize: 50,
-				hasBalloon: false,
-				id: type,
+				id: type
 				});
+				
 			clusterer.add(myGeoObjects);
 			myMap.geoObjects.add(clusterer);
-		});
-		
-		getPointData = function (index) {
-            return {
-                balloonContentBody: 'балун <strong>метки ' + index + '</strong>',
-                clusterCaption: 'метка <strong>' + index + '</strong>'
-            };
-        };
-		
-		
+			/*
+			clusterer.events.add('click', function(e) {
+				information.*/
+				
+				
+				
+				
+	
+		});		
 	}
 
 	
@@ -227,7 +243,6 @@ function init () {
 				}
 			}
 		});
-	
 	create_request(get_events_url(year_from, year_to, type, ''), color);
 }
 
