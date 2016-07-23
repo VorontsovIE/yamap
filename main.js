@@ -37,8 +37,8 @@ $jq(function () {
 		console.log('cntry');
 		create_request(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase()), color);
 	});
-	
-	
+
+
 	//Ползунок
   $( "#slider-range" ).slider({
 	stop: function(event, ui) {
@@ -63,7 +63,7 @@ $jq(function () {
     " - " + $( "#slider-range" ).slider( "values", 1 ) );
 });
 
-  
+
 
 function init () {
 	//Инициализация карты
@@ -98,7 +98,7 @@ function init () {
                 );
                 tick.globalPixelCenter = [tick.globalPixelCenter[0], tick.globalPixelCenter[1] - mapSize[1] / 2];
                 tick.duration = 0;
-            } 
+            }
             return tick;
         });
 
@@ -117,18 +117,18 @@ function init () {
 			}}),
 		]
 	});
-	
-	
+
+
 	myMap.controls.add(category_list);
 	'<p><input type="text" maxlength="25" size="20"></p>'
     $jq('#log').toggle();
-	
+
 	var open_by_id;
 	create_countries = function(finish_callback) {
 		var url = BaseURL + '/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
 		console.log(url);
 		$jq.ajax({
-			url: url, 
+			url: url,
 			dataType: 'json',
 		}).done(function(data){
 			var country_list = [];
@@ -146,11 +146,11 @@ function init () {
 	}
 	$("select.countries").select2();
 	create_countries();
-	
+
 	//Начинка. Формирование запроса.
 	create_request = function(url, color, type) {
 		console.log (url);
-		$jq.ajax({ 
+		$jq.ajax({
 			url: url,
 			dataType: 'json',
 		}).done(function(data) {
@@ -159,18 +159,18 @@ function init () {
 			console.log (url);
 			for (var i in data){
 				//Добавление метки.
-				
-				var link_html = '<a href="' + data[i]['url'] + '" target="_blank">см. Википедию</a>';
-				var information = "<b>" + data[i]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[i]["comment"] + "<br>" + "<i>Sides:</i>" + data[i]["data"]["sides"] + "<br>" + "<i>Date:</i>"  + " from " + data[i]["period"]["from_date"]["day"] + "." + data[i]["period"]["from_date"]["month"] + "." + data[i]["period"]["from_date"]["year"] + " to " + data[i]["period"]["to_date"]["day"] + "." + data[i]["period"]["to_date"]["month"] + "." + data[i]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-					
-				myGeoObjects[i] = new ymaps.Placemark([data[i]["coord"]["lat"], data[i]["coord"]["lng"]], {
-					hintContent: data[i]["coord"]["comment"] + "\n" + data[i]["title"],
-					balloonContentBody: information,
-					balloonContentHeader: data[i]["title"]},{
-						openBalloonOnClick: false,
-						preset: color + 'DotIcon'
-				});
+
 				fn = function(j){
+					var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
+					var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
+
+					myGeoObjects[j] = new ymaps.Placemark([data[j]["coord"]["lat"], data[j]["coord"]["lng"]], {
+						hintContent: data[j]["coord"]["comment"] + "\n" + data[j]["title"],
+						balloonContentBody: information,
+						balloonContentHeader: data[j]["title"]},{
+							openBalloonOnClick: false,
+							preset: color + 'DotIcon'
+					});
 					//Генерация текста в окно.
 					myGeoObjects[j].events.add('click', function (e) {
 						if (open_by_id != j + url) { // url добавляем для работы с метками с одним i (индексом), но из разных категорий.
@@ -182,44 +182,44 @@ function init () {
 							$jq('#log').hide();
 							open_by_id = -1;
 						}
-					});				
+					});
 				};
 				fn(i);
 				//myMap.geoObjects.add(myPlacemark)
-				
+
 			};
-			
-			
+
+
 			//Кластеризация.
 			//clusterer.options.set('geoObjectOpenBalloonOnClick', true)
-			var clusterer = new ymaps.Clusterer({ 
-				gridSize: 64, 
+			var clusterer = new ymaps.Clusterer({
+				gridSize: 64,
 				hasBalloon: true,
 				margin: 10,
 				showInAlphabeticalOrder: true,
-				zoomMargin: 0, 
+				zoomMargin: 0,
 				clusterDisableClickZoom: true,
 				id: type
 				});
-				
+
 			clusterer.add(myGeoObjects);
 			myMap.geoObjects.add(clusterer);
 			/*
 			clusterer.events.add('click', function(e) {
 				information.*/
-				
-				
-				
-				
-	
-		});		
+
+
+
+
+
+		});
 	}
 
-	
+
 	category_list.events.add('click', function (e) {
-            var item = e.get('target');
+			var item = e.get('target');
 			if (item.data.get('type') != undefined)
-			{	
+			{
 				if (item.data.select == true) {
 					var iter = myMap.geoObjects.getIterator();
 					var obj = iter.getNext();
