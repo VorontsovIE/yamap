@@ -1,6 +1,0 @@
-﻿myCallback({
-    "type": "FeatureCollection",
-    "features": [
-	{"type": "Feature", "id": 3, "geometry": {"type":"Circle", "coordinates": [55.998333, -2.522778], "radius": 1000}}
-    ]
-})
