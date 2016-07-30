@@ -222,7 +222,8 @@ function init () {
 				var ID_object=[];
 				for (var h in clusterer.geoObjects){
 					ID_keeper.push(clusterer.geoObjects[h].properties.get('ID'));
-					ID_object.push({clusterer.geoObjects[h].properties.get('ID'): clusterer.geoObjects[h]})
+					var eventId = clusterer.geoObjects[h].properties.get('ID');
+					ID_object.push({eventId: clusterer.geoObjects[h]})
 				};
 				$jq.ajax({
 					url: BaseURL + "/by_id?id=" + ID_keeper.join(','),
@@ -236,8 +237,8 @@ function init () {
 						'balloonContentHeader', 'data[j]["title"]' );
 					}
 					
-				}
-			}
+				})
+			})
 
 
 
