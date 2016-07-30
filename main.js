@@ -151,7 +151,7 @@ function init () {
 	create_request = function(url, color, type) {
 		console.log (url);
 		$jq.ajax({
-			url: BaseURL + '/?year_from=' + year_from + '&year_to=' + year_to + '&only_coord',
+			url: url,
 			dataType: 'json',
 		}).done(function(data) {
 			myGeoObjects = [];
@@ -161,39 +161,27 @@ function init () {
 				//Добавление метки.
 
 				fn = function(j){
-					//var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
-					//var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
+					var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
+					var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
 
 					myGeoObjects[j] = new ymaps.Placemark([data[j]["coord"]["lat"], data[j]["coord"]["lng"]], {
-						hintContent: data[j]["coord"]["comment"],
-						ID: data[j]["eventId"]
-						},{
+						hintContent: data[j]["coord"]["comment"] + "\n" + data[j]["title"],
+						balloonContentBody: information,
+						balloonContentHeader: data[j]["title"]},{
 							openBalloonOnClick: false,
 							preset: color + 'DotIcon'
-							});
+					});
 					//Генерация текста в окно.
 					myGeoObjects[j].events.add('click', function (e) {
-						$jq.ajax({
-							url: BaseURL + "/by_id?id=" + myGeoObjects[j].properties.get('ID'),
-							dataType: 'json',
-						}).done(function(inform) {
-							var link_html = '<a href="' + inform[0]['url'] + '" target="_blank">см. Википедию</a>';
-							var information = "<b>" + inform[0]["title"] + "</b><br><br>" + "<i>Information:</i> " + inform[0]["comment"] + "<br>" + "<i>Sides:</i>" + inform[0]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + inform[0]["period"]["from_date"]["day"] + "." + inform[0]["period"]["from_date"]["month"] + "." + inform[0]["period"]["from_date"]["year"] + " to " + inform[0]["period"]["to_date"]["day"] + "." + inform[0]["period"]["to_date"]["month"] + "." + inform[0]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-							//Пока у нас информация о метке выводится без помощи балуна, значит записывать её здесь не нужно.
-							//myGeoObjects[j].properties.set('hintContent', 'inform[0]["coord"]["comment"] + "\n" + inform[0]["title"]',
-							//'balloonContentBody', 'information',
-							//'balloonContentHeader', 'inform[j]["title"]');
-						
-							if (open_by_id != myGeoObjects[j].properties.get('ID')) { 
-								$jq('#log').html(information);
-								$jq('#log').show();
-								open_by_id = myGeoObjects[j].properties.get('ID')
-							}
-							else {
-								$jq('#log').hide();
-								open_by_id = -1;
-							}
-						});
+						if (open_by_id != j + url) { // url добавляем для работы с метками с одним i (индексом), но из разных категорий.
+							$jq('#log').show();
+							$jq('#log').html(information);
+							open_by_id = j + url
+						}
+						else {
+							$jq('#log').hide();
+							open_by_id = -1;
+						}
 					});
 				};
 				fn(i);
@@ -216,29 +204,10 @@ function init () {
 
 			clusterer.add(myGeoObjects);
 			myMap.geoObjects.add(clusterer);
-			//Отдаём информацию о метках при клике на кластер.
+			/*
 			clusterer.events.add('click', function(e) {
-				var ID_keeper=[];
-				var ID_object=[];
-				for (var h in clusterer.geoObjects){
-					ID_keeper.push(clusterer.geoObjects[h].properties.get('ID'));
-					var eventId = clusterer.geoObjects[h].properties.get('ID');
-					ID_object.push({eventId: clusterer.geoObjects[h]})
-				};
-				$jq.ajax({
-					url: BaseURL + "/by_id?id=" + ID_keeper.join(','),
-					dataType: 'json',
-				}).done(function(data) {
-					for (var j in data){
-						var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
-						var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-						ID_object[ID_keeper[j]].properties.set('hintContent', 'data[j]["coord"]["comment"] + "\n" + data[j]["title"]',
-						'balloonContentBody', 'information',
-						'balloonContentHeader', 'data[j]["title"]' );
-					}
-					
-				})
-			})
+				information.*/
+
 
 
 
