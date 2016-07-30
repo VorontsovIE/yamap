@@ -233,7 +233,7 @@ function init () {
 						var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
 						ID_object[ID_keeper[j]].properties.set('hintContent', 'data[j]["coord"]["comment"] + "\n" + data[j]["title"]',
 						'balloonContentBody', 'information',
-						'balloonContentHeader', 'data[j]["title"]');
+						'balloonContentHeader', 'data[j]["title"]' );
 					}
 					
 				}
