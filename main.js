@@ -1,4 +1,4 @@
-var BaseURL = 'http://95.85.18.95:4567';
+var BaseURL = 'http://localhost:4567';
 var year_from = 1500;
 var year_to = 1900;
 var type = 'military_conflict';
@@ -217,14 +217,16 @@ function init () {
 			clusterer.add(myGeoObjects);
 			myMap.geoObjects.add(clusterer);
 			//Отдаём информацию о метках при клике на кластер.
-			clusterer.events.add('click', function(e) {
+			clusterer.events.add('click', function(event) {
 				var ID_keeper=[];
-				var ID_object=[];
-				for (var h in clusterer.geoObjects){
-					ID_keeper.push(clusterer.geoObjects[h].properties.get('ID'));
-					var eventId = clusterer.geoObjects[h].properties.get('ID');
-					ID_object.push({eventId: clusterer.geoObjects[h]})
-				};
+				var ID_object={};
+				var cluster_placemarks = event.get('target').getGeoObjects();
+				for (var placemark_index in cluster_placemarks) {
+					var id = cluster_placemarks[placemark_index].properties.get('ID');
+					console.log('id',id)
+					ID_keeper.push(id);
+					ID_object[id]=cluster_placemarks[placemark_index];
+				}
 				$jq.ajax({
 					url: BaseURL + "/by_id?id=" + ID_keeper.join(','),
 					dataType: 'json',
@@ -232,9 +234,9 @@ function init () {
 					for (var j in data){
 						var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
 						var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-						ID_object[ID_keeper[j]].properties.set('hintContent', 'data[j]["coord"]["comment"] + "\n" + data[j]["title"]',
-						'balloonContentBody', 'information',
-						'balloonContentHeader', 'data[j]["title"]' );
+						ID_object[ID_keeper[j]].properties.set('hintContent', data[j]["title"]);
+						ID_object[ID_keeper[j]].properties.set('balloonContentBody', information);
+						ID_object[ID_keeper[j]].properties.set('balloonContentHeader', data[j]["title"] );
 					}
 					
 				})
