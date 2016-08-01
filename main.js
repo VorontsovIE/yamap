@@ -1,4 +1,5 @@
-var BaseURL = 'http://localhost:4567';
+var BaseURL = 'http://95.85.18.95:4567';
+BaseURL = 'http://localhost:4567'; // comment, when you need to push on
 var year_from = 1500;
 var year_to = 1900;
 var type = 'military_conflict';
@@ -15,8 +16,8 @@ function get_events_url(year_from, year_to, type, countries) {
 // Перебор объектов не до бесконечности
 function isEmpty(obj) {
     if (obj == null) return true;
-    if (obj.length > 0) return false;
     if (obj.length === 0) return true;
+    if (obj.length > 0) return false;
     for (var key in obj) {
         if (hasOwnProperty.call(obj, key)) return false;
     }
@@ -25,7 +26,6 @@ function isEmpty(obj) {
 
 var chosen = [];
 $jq(function () {
-
     $('#country-selector select').on('change', function(event) {
         // Ввод и считывание страны
         // .val([chosen]).trigger("change");
@@ -39,7 +39,6 @@ $jq(function () {
         console.log('cntry');
         create_request(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase()), color);
     });
-
 
     // Date range picker
     $( "#slider-range" ).slider({
@@ -66,8 +65,7 @@ $jq(function () {
 
 
 
-function init () {
-    //Инициализация карты
+function map_init () {
     myMap = new ymaps.Map("map", {
         center: [48.856929, 15.341198],
         zoom: 2,
@@ -122,7 +120,6 @@ function init () {
             ),
         ]
     });
-
 
     myMap.controls.add(category_list);
     '<p><input type="text" maxlength="25" size="20"></p>'
@@ -266,7 +263,6 @@ function init () {
         );
     }
 
-
     category_list.events.add('click', function (e) {
         var item = e.get('target');
         if (item.data.get('type') != undefined) {
@@ -291,4 +287,4 @@ function init () {
     create_request(get_events_url(year_from, year_to, type, ''), color);
 }
 
-ymaps.ready(init);
+ymaps.ready(map_init);
