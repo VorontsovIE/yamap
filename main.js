@@ -147,6 +147,15 @@ function init () {
 	$("select.countries").select2();
 	create_countries();
 
+  set_placemark_content = function(placemark, data) {
+    var link_html = '<a href="' + data['url'] + '" target="_blank">см. Википедию</a>';
+    var information = "<b>" + data["title"] + "</b><br><br>" + "<i>Information:</i> " + data["comment"] + "<br>" + "<i>Sides:</i>" + data["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data["period"]["from_date"]["day"] + "." + data["period"]["from_date"]["month"] + "." + data["period"]["from_date"]["year"] + " to " + data["period"]["to_date"]["day"] + "." + data["period"]["to_date"]["month"] + "." + data["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
+    placemark.properties.set('full_info_loaded', true);
+    placemark.properties.set('hintContent', data["title"]);
+    placemark.properties.set('balloonContentBody', information);
+    placemark.properties.set('balloonContentHeader', data["title"] );
+  }
+
 	//Начинка. Формирование запроса.
 	create_request = function(url, color, type) {
 		console.log (url);
@@ -237,12 +246,7 @@ function init () {
             }).done(function(data) {
                 for (var j in data){
                     var eventId = data[j]['eventId'];
-                    var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
-                    var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-                    placemark_by_id[eventId].properties.set('full_info_loaded', true);
-                    placemark_by_id[eventId].properties.set('hintContent', data[j]["title"]);
-        						placemark_by_id[eventId].properties.set('balloonContentBody', information);
-        						placemark_by_id[eventId].properties.set('balloonContentHeader', data[j]["title"] );
+                    set_placemark_content(placemark_by_id[eventId], data[j])
       					}
     				});
         }
