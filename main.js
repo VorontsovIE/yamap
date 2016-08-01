@@ -5,13 +5,14 @@ var year_to = 1900;
 var type = 'military_conflict';
 color = '#eee';
 
-var countries = '';
+var chosen = [];
+var countries = [];
 var country;
-
 
 function get_events_url(year_from, year_to, type, countries) {
     return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries + '&only_coord');
 }
+console.log('кантри', get_events_url(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase())));
 
 // Перебор объектов не до бесконечности
 function isEmpty(obj) {
@@ -24,16 +25,15 @@ function isEmpty(obj) {
     return true;
 };
 
-var chosen = [];
 $jq(function () {
     $('#country-selector select').on('change', function(event) {
         // Ввод и считывание страны
         // .val([chosen]).trigger("change");
         countries = $(event.target).val();
-        chosen = countries;
         if (countries == null || countries.join == null) {
             countries=[];
         }
+        chosen = countries;
         myMap.geoObjects.removeAll();
         // countries.concat(chosen);
         console.log('cntry');
@@ -46,6 +46,7 @@ $jq(function () {
             year_from = $("#slider-range").slider("values", 0);
             year_to = $("#slider-range").slider("values", 1);
             myMap.geoObjects.removeAll();
+			console.log( 'chosen', chosen)
             create_countries(function(){
                 create_request(get_events_url(year_from, year_to, type, chosen.join(',')), color)
             });
