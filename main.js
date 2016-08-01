@@ -10,7 +10,7 @@ var country;
 
 
 function get_events_url(year_from, year_to, type, countries) {
-    return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries);
+    return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries + '&only_coord');
 }
 
 // Перебор объектов не до бесконечности
@@ -47,7 +47,7 @@ $jq(function () {
             year_to = $("#slider-range").slider("values", 1);
             myMap.geoObjects.removeAll();
             create_countries(function(){
-                create_request(get_events_url(year_from, year_to, type, chosen), color)
+                create_request(get_events_url(year_from, year_to, type, chosen.join(',')), color)
             });
         //console.log(chosen);
         },
@@ -164,7 +164,7 @@ function map_init () {
     create_request = function(url, color, type) {
         console.log(url);
         $jq.ajax({
-            url: BaseURL + '/?year_from=' + year_from + '&year_to=' + year_to + '&only_coord',
+            url: url,
             dataType: 'json',
         }).done(
             function(data) {
@@ -280,7 +280,7 @@ function map_init () {
                 item.data.select = true;
                 type = item.data.get('type')
                 color = item.data.get('color')
-                create_request(get_events_url(year_from, year_to, type, countries), color, type);
+                create_request(get_events_url(year_from, year_to, type, countries.join(',')), color, type);
             }
         }
     });
