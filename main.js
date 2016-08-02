@@ -185,35 +185,8 @@ function map_init () {
                             hintContent: data[j]["coord"]["comment"],
                             ID: data[j]["eventId"]
                         },{
-                            openBalloonOnClick: false,
+                            openBalloonOnClick: true,
                             preset: color + 'DotIcon'
-                        });
-                        // Генерация текста в окно.
-                        myGeoObjects[j].events.add('click', function (e) {
-                            var event_url = BaseURL + "/by_id?id=" + myGeoObjects[j].properties.get('ID');
-                            console.log('create_request, placemark click -- ' + event_url);
-                            $jq.ajax({
-                                url: event_url,
-                                dataType: 'json',
-                            }).done(function(inform) {
-                                console.log('create_request, placemark click -- data from ' + event_url + ' loaded');
-                                var link_html = '<a href="' + inform[0]['url'] + '" target="_blank">см. Википедию</a>';
-                                var information = "<b>" + inform[0]["title"] + "</b><br><br>" + "<i>Information:</i> " + inform[0]["comment"] + "<br>" + "<i>Sides:</i>" + inform[0]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + inform[0]["period"]["from_date"]["day"] + "." + inform[0]["period"]["from_date"]["month"] + "." + inform[0]["period"]["from_date"]["year"] + " to " + inform[0]["period"]["to_date"]["day"] + "." + inform[0]["period"]["to_date"]["month"] + "." + inform[0]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-                                // Пока у нас информация о метке выводится без помощи балуна, значит записывать её здесь не нужно.
-                                // myGeoObjects[j].properties.set('hintContent', 'inform[0]["coord"]["comment"] + "\n" + inform[0]["title"]',
-                                // 'balloonContentBody', 'information',
-                                // 'balloonContentHeader', 'inform[j]["title"]');
-
-                                if (open_by_id != myGeoObjects[j].properties.get('ID')) {
-                                    $jq('#log').html(information);
-                                    $jq('#log').show();
-                                    open_by_id = myGeoObjects[j].properties.get('ID')
-                                }
-                                else {
-                                    $jq('#log').hide();
-                                    open_by_id = -1;
-                                }
-                            });
                         });
                     };
                     fn(i);
@@ -240,7 +213,13 @@ function map_init () {
                     console.log('create_request, cluster click triggered');
                     var placemark_ids_to_load = [];
                     var placemark_by_id = {};
-                    var cluster_placemarks = event.get('target').getGeoObjects();
+                    var cluster_placemarks;
+                    if ((event.get('target')) instanceof ymaps.Placemark == false) {
+                        cluster_placemarks = event.get('target').getGeoObjects();
+                    } else {
+                        cluster_placemarks = [event.get('target')];
+                    }
+
                     for (var placemark_index in cluster_placemarks) {
                         var placemark = cluster_placemarks[placemark_index];
                         var placemark_id = placemark.properties.get('ID');
@@ -265,6 +244,13 @@ function map_init () {
                                 }
                             }
                         );
+                        //Балун метки может загрузиться только с информацией, если её нет во время клика, надо вызывать балун отдельно.
+                        if ((event.get('target')) instanceof ymaps.Placemark == true){
+                            console.log('create_request, singular placemark forced to open');
+                            var geoObject = event.get('target'),
+                            position = event.get('globalPixels'),
+                            balloon = geoObject.balloon.open(position);
+                        }
                     }
 
                 });
