@@ -213,12 +213,13 @@ function map_init () {
                     console.log('create_request, cluster click triggered');
                     var placemark_ids_to_load = [];
                     var placemark_by_id = {};
-					if ((event.get('target')) instanceof ymaps.Placemark == false){
-                        var cluster_placemarks = event.get('target').getGeoObjects();
-					}
-					else{
-						var cluster_placemarks = [event.get('target')]
-					}
+                    var cluster_placemarks;
+                    if ((event.get('target')) instanceof ymaps.Placemark == false) {
+                        cluster_placemarks = event.get('target').getGeoObjects();
+                    } else {
+                        cluster_placemarks = [event.get('target')];
+                    }
+
                     for (var placemark_index in cluster_placemarks) {
                         var placemark = cluster_placemarks[placemark_index];
                         var placemark_id = placemark.properties.get('ID');
@@ -243,12 +244,13 @@ function map_init () {
                                 }
                             }
                         );
-						//Балун метки может загрузиться только с информацией, если её нет во время клика, надо вызывать балун отдельно.
-						if ((event.get('target')) instanceof ymaps.Placemark == true){
-							var geoObject = event.get('target'),
+                        //Балун метки может загрузиться только с информацией, если её нет во время клика, надо вызывать балун отдельно.
+                        if ((event.get('target')) instanceof ymaps.Placemark == true){
+                            console.log('create_request, singular placemark forced to open');
+                            var geoObject = event.get('target'),
                             position = event.get('globalPixels'),
-							balloon = geoObject.balloon.open(position);
-					    } 
+                            balloon = geoObject.balloon.open(position);
+                        }
                     }
 
                 });
