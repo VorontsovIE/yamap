@@ -10,9 +10,15 @@ var countries = [];
 var country;
 
 function get_events_url(year_from, year_to, type, countries) {
-    return (BaseURL + '/?' + 'year_from=' + year_from + '&year_to=' + year_to + '&type=' + type + '&country=' + countries + '&only_coord');
+    var type_filter, country_filter, date_filter, params_array;
+    type_filter = type ? ('type=' + type) : '';
+    country_filter = countries ? ('country=' + countries.join(',').toLowerCase()) : '';
+    date_filter = 'year_from=' + year_from + '&year_to=' + year_to;
+    params_array = [date_filter, type_filter, country_filter, 'only_coord'].filter(function(elem, index, arr) {
+        return elem; // Leave non-empty elements
+    });
+    return (BaseURL + '/?' + params_array.join('&'));
 }
-console.log('кантри', get_events_url(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase())));
 
 // Перебор объектов не до бесконечности
 function isEmpty(obj) {
@@ -31,13 +37,13 @@ $jq(function () {
         // .val([chosen]).trigger("change");
         countries = $(event.target).val();
         if (countries == null || countries.join == null) {
-            countries=[];
+            countries = [];
         }
+        console.log('#country-selector --> change; countries: ' + countries);
         chosen = countries;
         myMap.geoObjects.removeAll();
         // countries.concat(chosen);
-        console.log('cntry');
-        create_request(get_events_url(year_from, year_to, type, countries.join(',').toLowerCase()), color);
+        create_request(get_events_url(year_from, year_to, type, countries), color);
     });
 
     // Date range picker
@@ -45,12 +51,11 @@ $jq(function () {
         stop: function(event, ui) {
             year_from = $("#slider-range").slider("values", 0);
             year_to = $("#slider-range").slider("values", 1);
+            console.log('#slider-range --> stop; from: ' + year_from + '; to: ' + year_to);
             myMap.geoObjects.removeAll();
-			console.log( 'chosen', chosen)
             create_countries(function(){
-                create_request(get_events_url(year_from, year_to, type, chosen.join(',')), color)
+                create_request(get_events_url(year_from, year_to, type, chosen), color)
             });
-        //console.log(chosen);
         },
         range: true,
         min: 1,
@@ -129,12 +134,13 @@ function map_init () {
     var open_by_id;
     create_countries = function(finish_callback) {
         var url = BaseURL + '/countries' + '?year_from=' + year_from + '&year_to=' + year_to + '&counter=true';
-        console.log(url);
+        console.log('create_countries -- ' + url);
         $jq.ajax({
             url: url,
             dataType: 'json',
         }).done(
             function(data){
+                console.log('create_countries -- data from ' + url + ' loaded');
                 var country_list = [];
                 for (var country in data){
                     country_list.push({id: data[country][1], text:data[country][0] +' '+ data[country][1]})
@@ -144,6 +150,7 @@ function map_init () {
                 });
                 $('#country-selector select').val(chosen).trigger("change");
                 if (finish_callback) {
+                    console.log('Run create countries callback');
                     finish_callback();
                 }
             }
@@ -163,22 +170,17 @@ function map_init () {
 
     //Начинка. Формирование запроса.
     create_request = function(url, color, type) {
-        console.log(url);
+        console.log('create_request -- ' + url);
         $jq.ajax({
             url: url,
             dataType: 'json',
         }).done(
             function(data) {
+                console.log('create request -- data from ' + url + ' loaded');
                 myGeoObjects = [];
-                console.log('data_loaded');
-                console.log(url);
                 for (var i in data){
-                    //Добавление метки.
-
+                    // Add placemark
                     fn = function(j){
-                        //var link_html = '<a href="' + data[j]['url'] + '" target="_blank">см. Википедию</a>';
-                        //var information = "<b>" + data[j]["title"] + "</b><br><br>" + "<i>Information:</i> " + data[j]["comment"] + "<br>" + "<i>Sides:</i>" + data[j]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + data[j]["period"]["from_date"]["day"] + "." + data[j]["period"]["from_date"]["month"] + "." + data[j]["period"]["from_date"]["year"] + " to " + data[j]["period"]["to_date"]["day"] + "." + data[j]["period"]["to_date"]["month"] + "." + data[j]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-
                         myGeoObjects[j] = new ymaps.Placemark([data[j]["coord"]["lat"], data[j]["coord"]["lng"]], {
                             hintContent: data[j]["coord"]["comment"],
                             ID: data[j]["eventId"]
@@ -186,18 +188,21 @@ function map_init () {
                             openBalloonOnClick: false,
                             preset: color + 'DotIcon'
                         });
-                        //Генерация текста в окно.
+                        // Генерация текста в окно.
                         myGeoObjects[j].events.add('click', function (e) {
+                            var event_url = BaseURL + "/by_id?id=" + myGeoObjects[j].properties.get('ID');
+                            console.log('create_request, placemark click -- ' + event_url);
                             $jq.ajax({
-                                url: BaseURL + "/by_id?id=" + myGeoObjects[j].properties.get('ID'),
+                                url: event_url,
                                 dataType: 'json',
                             }).done(function(inform) {
+                                console.log('create_request, placemark click -- data from ' + event_url + ' loaded');
                                 var link_html = '<a href="' + inform[0]['url'] + '" target="_blank">см. Википедию</a>';
                                 var information = "<b>" + inform[0]["title"] + "</b><br><br>" + "<i>Information:</i> " + inform[0]["comment"] + "<br>" + "<i>Sides:</i>" + inform[0]["data"]["sides"] + "<br>" + "<i>Date:</i>" + " from " + inform[0]["period"]["from_date"]["day"] + "." + inform[0]["period"]["from_date"]["month"] + "." + inform[0]["period"]["from_date"]["year"] + " to " + inform[0]["period"]["to_date"]["day"] + "." + inform[0]["period"]["to_date"]["month"] + "." + inform[0]["period"]["to_date"]["year"] + "<br>" + "<i>Ref:</i> " + link_html;
-                                //Пока у нас информация о метке выводится без помощи балуна, значит записывать её здесь не нужно.
-                                //myGeoObjects[j].properties.set('hintContent', 'inform[0]["coord"]["comment"] + "\n" + inform[0]["title"]',
-                                //'balloonContentBody', 'information',
-                                //'balloonContentHeader', 'inform[j]["title"]');
+                                // Пока у нас информация о метке выводится без помощи балуна, значит записывать её здесь не нужно.
+                                // myGeoObjects[j].properties.set('hintContent', 'inform[0]["coord"]["comment"] + "\n" + inform[0]["title"]',
+                                // 'balloonContentBody', 'information',
+                                // 'balloonContentHeader', 'inform[j]["title"]');
 
                                 if (open_by_id != myGeoObjects[j].properties.get('ID')) {
                                     $jq('#log').html(information);
@@ -212,8 +217,7 @@ function map_init () {
                         });
                     };
                     fn(i);
-                    //myMap.geoObjects.add(myPlacemark)
-
+                    // myMap.geoObjects.add(myPlacemark)
                 };
 
 
@@ -233,6 +237,7 @@ function map_init () {
                 myMap.geoObjects.add(clusterer);
                 // Load info on click to a cluster
                 clusterer.events.add('click', function(event) {
+                    console.log('create_request, cluster click triggered');
                     var placemark_ids_to_load = [];
                     var placemark_by_id = {};
                     var cluster_placemarks = event.get('target').getGeoObjects();
@@ -246,11 +251,14 @@ function map_init () {
                     }
 
                     if (placemark_ids_to_load.length > 0) {
+                        var cluster_url = BaseURL + "/by_id?id=" + placemark_ids_to_load.join(',');
+                        console.log('create_request, cluster click -- ' + cluster_url);
                         $jq.ajax({
-                            url: BaseURL + "/by_id?id=" + placemark_ids_to_load.join(','),
+                            url: cluster_url,
                             dataType: 'json',
                         }).done(
                             function(data) {
+                                console.log('create_request, cluster click -- data from ' + cluster_url + ' loaded');
                                 for (var j in data){
                                     var eventId = data[j]['eventId'];
                                     set_placemark_content(placemark_by_id[eventId], data[j])
@@ -265,9 +273,11 @@ function map_init () {
     }
 
     category_list.events.add('click', function (e) {
+        console.log('Category selector clicked');
         var item = e.get('target');
         if (item.data.get('type') != undefined) {
             if (item.data.select == true) {
+                console.log('Category selector -- event removal');
                 var iter = myMap.geoObjects.getIterator();
                 var obj = iter.getNext();
                 while (isEmpty(obj) == false) {
@@ -281,11 +291,14 @@ function map_init () {
                 item.data.select = true;
                 type = item.data.get('type')
                 color = item.data.get('color')
-                create_request(get_events_url(year_from, year_to, type, countries.join(',')), color, type);
+                console.log('Category selector -- request for events');
+                create_request(get_events_url(year_from, year_to, type, countries), color, type);
             }
         }
     });
-    create_request(get_events_url(year_from, year_to, type, ''), color);
+
+    console.log('Request for events on initial page load');
+    create_request(get_events_url(year_from, year_to, type, []), color);
 }
 
 ymaps.ready(map_init);
